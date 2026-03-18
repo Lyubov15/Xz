@@ -543,13 +543,25 @@
             `);
 
             marker.on('popupopen', (e) => {
-                const btn = e.popup.getElement().querySelector(`#delete-mall-${marker.id}`);
-                if (btn) {
-                    btn.addEventListener('click', () => {
-                        removeNewMallMarker(marker);
-                    });
-                }
-            });
+    const btn = e.popup.getElement().querySelector(`#delete-mall-${marker.id}`);
+    if (btn) {
+        btn.addEventListener('click', () => {
+            console.log('Кнопка удалить нажата, mallNumber:', marker.mallNumber);
+            if (map.hasLayer(marker)) map.removeLayer(marker);
+            if (marker.mallNumber !== undefined) usedMallNumbers.delete(marker.mallNumber);
+            const idx = allMarkers.indexOf(marker);
+            if (idx !== -1) allMarkers.splice(idx, 1);
+            const existingIdx = window.shoppingCenters.findIndex(sc =>
+                Math.abs(sc.lat - marker.getLatLng().lat) < 0.000001 &&
+                Math.abs(sc.lng - marker.getLatLng().lng) < 0.000001 &&
+                sc.name === marker.customName
+            );
+            if (existingIdx !== -1) window.shoppingCenters.splice(existingIdx, 1);
+            setInfo(`${marker.customName} удалён`);
+            if (influenceLayer && map.hasLayer(influenceLayer)) updateVoronoiZones();
+        });
+    }
+});
 
             allMarkers.push(marker);
             marker.addTo(map);
